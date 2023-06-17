@@ -1,3 +1,4 @@
+import { Chess } from "chess.js";
 import { FromSchema, JSONSchema } from "json-schema-to-ts";
 import { ZilchNamespace } from "zilch-game-engine";
 
@@ -7,18 +8,17 @@ import { ZilchNamespace } from "zilch-game-engine";
 type RawConfig = FromSchema<typeof configSchema>;
 
 export interface Config {
-  initialBoard: ("x" | "o" | "empty")[][];
-  initialTurn: number;
+  fen: string;
 }
 
-export interface State {
-  errorEmphasisSpot: { x: number; y: number } | null;
-  board: ("x" | "o" | "empty")[][];
-}
+export type State = string;
 
 declare global {
   const Zilch: ZilchNamespace<RawConfig, Config, State>;
 }
+
+export const standardStartingPosition =
+  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 /**
  * Schema for the JSON users can input as part of
@@ -26,22 +26,14 @@ declare global {
  */
 const configSchema = {
   type: "object",
-  required: ["startingPosition"],
   properties: {
-    startingPosition: {
-      description: "The best description that ever there was.",
-      type: "array",
-      minItems: 3,
-      maxItems: 3,
-      items: {
-        type: "array",
-        minItems: 3,
-        maxItems: 3,
-        items: {
-          type: ["string"],
-          enum: ["x", "o", "empty"],
-        },
-      },
+    pgn: {
+      description: "Game in PGN format.",
+      type: "string",
+    },
+    fen: {
+      description: "Game in FEN format.",
+      type: "string",
     },
   },
 } as const satisfies JSONSchema;
@@ -50,54 +42,35 @@ Zilch.configSchema = configSchema;
 Zilch.configPresets = [
   {
     name: "Standard",
-    value:
-      `{\n` +
-      `  // 3x3 matrix with values "x", "o" and "empty"\n` +
-      `  "startingPosition": [\n` +
-      `    ["empty", "empty", "empty"],\n` +
-      `    ["empty", "empty", "empty"],\n` +
-      `    ["empty", "empty", "empty"]\n` +
-      `  ]\n` +
-      `}\n`,
+    value: `{\n` + `  "fen": "${standardStartingPosition}"\n` + `}\n`,
   },
 ];
 
 Zilch.parseConfig = (rawConfig) => {
-  let xCount = 0;
-  let oCount = 0;
+  const chess = new Chess();
+  if (rawConfig.pgn && rawConfig.fen) {
+    throw new Error("Specify either PGN or FEN but not both.");
+  }
 
-  const initialBoard = rawConfig.startingPosition.map((row) => {
-    return row.map((spot) => {
-      if (spot === "x") {
-        xCount++;
-        return "x" as const;
-      } else if (spot === "o") {
-        oCount++;
-        return "o" as const;
-      } else {
-        return "empty" as const;
-      }
-    });
-  });
-
-  if (xCount - oCount !== 0 && xCount - oCount !== 1) {
-    throw new Error(
-      "There should be an even number of Xs and Os (or just one more X than O) in the starting position."
-    );
+  if (rawConfig.pgn) {
+    chess.loadPgn(rawConfig.pgn);
+  } else if (rawConfig.fen) {
+    chess.load(rawConfig.fen);
   }
 
   return {
-    initialBoard,
-    initialTurn: oCount + xCount,
+    fen: chess.fen(),
   };
 };
 
 Zilch.serializeConfig = (config) => {
-  return config.initialBoard.map((row) => row.join(",")).join("|");
+  return config.fen;
 };
 
 Zilch.summarizeConfig = (config) => {
-  if (config.initialTurn === 0) {
+  if (
+    config.fen === "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+  ) {
     return "standard starting position";
   } else {
     return "custom starting position";

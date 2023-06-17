@@ -1,3 +1,4 @@
+import { Chess } from "chess.js";
 import type { CreateBotParams } from "zilch-game-engine";
 
 Zilch.Bot = class {
@@ -8,8 +9,8 @@ Zilch.Bot = class {
   }
 
   move(payload: string) {
-    // Actual implementation of this bot is private. Wouldn't be very fun if you
-    // could just copy/paste the boss bot's code!
-    return "no-op";
+    const possibleMoves = new Chess(payload).moves();
+
+    return possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
   }
 };

@@ -5,6 +5,7 @@ import {
   Node,
   Color3,
 } from "@babylonjs/core";
+import { Square } from "chess.js";
 import * as csx from "csx";
 
 export function stopAnimations(node: Node | Material) {
@@ -32,7 +33,9 @@ export function runAnimation(
     frames: { [frame: number]: unknown };
     easingFunction?: EasingFunction;
     easingMode?: "inout" | "in" | "out";
+    animationType?: number;
     delay?: number;
+    immediate?: boolean;
   }[]
 ) {
   return new Promise<void>((resolve) => {
@@ -47,15 +50,19 @@ export function runAnimation(
         target.name + "." + data.property + "." + target.uniqueId,
         data.property,
         60,
-        Animation.ANIMATIONTYPE_FLOAT
+        data.animationType ?? Animation.ANIMATIONTYPE_FLOAT
       );
 
       let minFrame = Infinity;
+      let maxFrame = -Infinity;
 
       const keys = Object.entries(data.frames).map(([frame, value]) => {
         const frameWithDelay = parseInt(frame) + (data.delay ?? 0);
         if (frameWithDelay < minFrame) {
           minFrame = frameWithDelay;
+        }
+        if (frameWithDelay > maxFrame) {
+          maxFrame = frameWithDelay;
         }
         return {
           frame: frameWithDelay,
@@ -64,6 +71,7 @@ export function runAnimation(
       });
 
       const firstValue = keys.find((key) => key.frame === minFrame)?.value;
+      const lastValue = keys.find((key) => key.frame === maxFrame)?.value;
       if ((data.delay ?? 0) > 0 && firstValue !== undefined) {
         keys.unshift({
           frame: 0,
@@ -71,7 +79,11 @@ export function runAnimation(
         });
       }
 
-      animation.setKeys(keys);
+      if (data.immediate) {
+        animation.setKeys([{ frame: 0, value: lastValue }]);
+      } else {
+        animation.setKeys(keys);
+      }
 
       if (data.easingFunction) {
         data.easingFunction.setEasingMode(

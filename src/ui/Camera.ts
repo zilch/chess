@@ -28,13 +28,15 @@ export class Camera {
       "camera",
       INITIAL_ALPHA,
       INITIAL_BETA,
-      22,
-      new Vector3(0, -1, 0),
+      0.9,
+      new Vector3(0, -0.03, 0),
       scene
     );
 
-    this.#camera.lowerRadiusLimit = 14;
-    this.#camera.upperRadiusLimit = 24;
+    this.#camera.wheelDeltaPercentage = 0.03;
+    this.#camera.minZ = 0.01;
+    this.#camera.lowerRadiusLimit = 0.5;
+    this.#camera.upperRadiusLimit = 1;
     this.#camera.panningSensibility = 0;
     this.#camera.upperBetaLimit = Math.PI * 0.4;
     this.#camera.useAutoRotationBehavior = true;
@@ -45,7 +47,7 @@ export class Camera {
         property: "radius",
         frames: {
           0: this.#camera.radius,
-          90: 18,
+          90: 0.75,
         },
         easingFunction: new BackEase(),
         easingMode: "out",

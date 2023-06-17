@@ -22,4 +22,5 @@ jobs:
       - run: npm install
       - run: npm run tsc
       - run: npm run eslint
+      - run: npm test
       - run: node_modules/.bin/zilch-game-engine prepare-release --token=${{ secrets.GITHUB_TOKEN }} --actor==${{ github.actor }} --version=${{ inputs.Version }} --sha=${{ github.sha }}

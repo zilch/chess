@@ -3,11 +3,13 @@ import {
   MeshBuilder,
   PBRMaterial,
   Scene,
+  ShadowGenerator,
+  Vector3,
 } from "@babylonjs/core";
 
 export class Ground {
   constructor(scene: Scene) {
-    const radius = 40;
+    const radius = 50;
 
     // Texture
     const groundTexture = new DynamicTexture(
@@ -33,7 +35,7 @@ export class Ground {
 
     // Material
     const groundMaterial = new PBRMaterial("GroundMaterial", scene!);
-    groundMaterial.roughness = 0.8;
+    groundMaterial.roughness = 0.9;
     groundTexture.hasAlpha = true;
     groundMaterial.albedoTexture = groundTexture;
     groundMaterial.useAlphaFromAlbedoTexture = true;
@@ -49,6 +51,8 @@ export class Ground {
     );
     groundMesh.material = groundMaterial;
     groundMesh.rotation.x = Math.PI / 2;
-    groundMesh.position.y = -1.35;
+    groundMesh.scaling = Vector3.One().scale(0.05);
+    groundMesh.position.y = 0;
+    groundMesh.receiveShadows = true;
   }
 }
