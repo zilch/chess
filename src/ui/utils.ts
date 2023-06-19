@@ -26,17 +26,19 @@ export function getNearestStep(target: number, current: number, step: number) {
   return target + (diff > 0 ? step * -stepCount : step * stepCount);
 }
 
+export interface AnimationData {
+  property: string;
+  frames: { [frame: number]: unknown };
+  easingFunction?: EasingFunction;
+  easingMode?: "inout" | "in" | "out";
+  animationType?: number;
+  delay?: number;
+  immediate?: boolean;
+}
+
 export function runAnimation(
   target: Node | Material,
-  animationData: {
-    property: string;
-    frames: { [frame: number]: unknown };
-    easingFunction?: EasingFunction;
-    easingMode?: "inout" | "in" | "out";
-    animationType?: number;
-    delay?: number;
-    immediate?: boolean;
-  }[]
+  animationData: AnimationData[]
 ) {
   return new Promise<void>((resolve) => {
     const animations = animationData.map((data) => {

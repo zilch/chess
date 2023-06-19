@@ -101,7 +101,7 @@ export function getBoardTransitionSteps(
       return false;
     }
 
-    const lastRank = color === "b" ? "2" : "7";
+    const lastRank = color === "b" ? "1" : "8";
     return !!adds.find((add) => add.piece.square === file + lastRank);
   };
   const removals: RemoveTransitionStep[] = [];

@@ -37,4 +37,37 @@ describe("getBoardTransitionSteps", () => {
     ]);
     expect(transitionSteps.moves).toEqual([{ from: "d4", to: "e5" }]);
   });
+
+  test("it should handle promotions correctly", () => {
+    const chess = new Chess("8/PK5k/8/8/8/8/5p2/8 w - - 0 1");
+    const fromFenWhite = chess.fen();
+    chess.move({ from: "a7", to: "a8", promotion: "q" });
+    const transitionStepsWhite = getBoardTransitionSteps(
+      chess.fen(),
+      fromFenWhite
+    );
+
+    expect(transitionStepsWhite.moves.length).toBe(0);
+    expect(transitionStepsWhite.adds).toEqual([
+      { piece: { type: "q", color: "w", square: "a8" } },
+    ]);
+    expect(transitionStepsWhite.removals).toEqual([
+      { square: "a7", removalReason: "promoted" },
+    ]);
+
+    const fromFenBlack = chess.fen();
+    chess.move({ from: "f2", to: "f1", promotion: "q" });
+    const transitionStepsBlack = getBoardTransitionSteps(
+      chess.fen(),
+      fromFenBlack
+    );
+
+    expect(transitionStepsBlack.moves.length).toBe(0);
+    expect(transitionStepsBlack.adds).toEqual([
+      { piece: { type: "q", color: "b", square: "f1" } },
+    ]);
+    expect(transitionStepsBlack.removals).toEqual([
+      { square: "f2", removalReason: "promoted" },
+    ]);
+  });
 });

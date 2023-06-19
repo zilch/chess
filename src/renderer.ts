@@ -36,7 +36,7 @@ Zilch.Renderer = class Renderer {
     this.#camera = new Camera(scene);
 
     this.#scene.lights.forEach((light) => {
-      light.intensity /= 1000;
+      light.intensity /= 900;
       if (light instanceof SpotLight) {
         const shadowGenerator = new ShadowGenerator(1024, light);
         shadowGenerator.usePercentageCloserFiltering = true;
@@ -54,7 +54,7 @@ Zilch.Renderer = class Renderer {
     this.#pieceManager = new PieceManager(scene, this.#shadowGenerators);
 
     const gl = new GlowLayer("GlowLayer");
-    gl.intensity = 4;
+    gl.intensity = 2;
 
     this.#engine.runRenderLoop(() => {
       this.#scene.render();
@@ -92,8 +92,17 @@ Zilch.Renderer = class Renderer {
     const currentFen = this.#getFen(current);
     const previousFen = this.#getFen(previous);
 
-    if (currentFen !== previousFen || previous === null) {
-      this.#pieceManager.update(currentFen);
+    if (
+      currentFen !== previousFen ||
+      current.botColors[0] !== previous?.botColors[0] ||
+      current.botColors[1] !== previous?.botColors[1] ||
+      previous === null
+    ) {
+      this.#pieceManager.update(
+        currentFen,
+        current.botColors[0] ?? null,
+        current.botColors[1] ?? null
+      );
     }
   }
 
