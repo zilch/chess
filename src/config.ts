@@ -26,14 +26,15 @@ export const standardStartingPosition =
  */
 const configSchema = {
   type: "object",
+  required: ["pgn", "fen"],
   properties: {
     pgn: {
       description: "Game in PGN format.",
-      type: "string",
+      type: ["string", "null"],
     },
     fen: {
       description: "Game in FEN format.",
-      type: "string",
+      type: ["string", "null"],
     },
   },
 } as const satisfies JSONSchema;
@@ -42,7 +43,11 @@ Zilch.configSchema = configSchema;
 Zilch.configPresets = [
   {
     name: "Standard",
-    value: `{\n` + `  "fen": "${standardStartingPosition}"\n` + `}\n`,
+    value:
+      `{\n` +
+      `  "pgn": null,\n` +
+      `  "fen": "${standardStartingPosition}"\n` +
+      `}\n`,
   },
 ];
 

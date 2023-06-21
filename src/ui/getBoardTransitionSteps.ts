@@ -27,6 +27,8 @@ export function getBoardTransitionSteps(
   removals: RemoveTransitionStep[];
   adds: AddTransitionStep[];
   moves: MoveTransitionStep[];
+  toChess: Chess;
+  fromChess: Chess | null;
 } {
   const toPieceMap = new PieceMap(toFen);
   const fromPieceMap = new PieceMap(fromFen);
@@ -116,7 +118,7 @@ export function getBoardTransitionSteps(
     });
   }
 
-  return { adds, moves, removals };
+  return { adds, moves, removals, toChess, fromChess };
 }
 
 class PieceMap {

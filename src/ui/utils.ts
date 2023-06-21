@@ -4,9 +4,39 @@ import {
   Animation,
   Node,
   Color3,
+  Vector3,
 } from "@babylonjs/core";
-import { Square } from "chess.js";
+import { PieceSymbol, Square } from "chess.js";
 import * as csx from "csx";
+
+export const ringDiameterMap: Record<PieceSymbol, number> = {
+  b: 0.031802,
+  r: 0.036644,
+  p: 0.028984,
+  q: 0.03997,
+  k: 0.04192,
+  n: 0.038996,
+};
+
+export const SQUARE_SIZE = 0.057888;
+export const BOARD_HEIGHT = 0.017393;
+
+export function isWhite(square: Square) {
+  const [file, rank] = square.split("");
+  const rankIndex = "12345678".indexOf(rank);
+  const fileIndex = "abcdefgh".indexOf(file);
+  return (rankIndex + fileIndex) % 2 === 1;
+}
+
+export function getPosition(square: Square) {
+  const [file, rank] = square.split("");
+  const rankIndex = "12345678".indexOf(rank);
+  const fileIndex = "abcdefgh".indexOf(file);
+  const x = (rankIndex - 3.5) * -SQUARE_SIZE;
+  const z = (fileIndex - 3.5) * SQUARE_SIZE;
+  const y = BOARD_HEIGHT;
+  return new Vector3(x, y, z);
+}
 
 export function stopAnimations(node: Node | Material) {
   node

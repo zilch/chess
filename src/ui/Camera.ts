@@ -20,10 +20,10 @@ const INITIAL_BETA = Math.PI * 0.26;
 
 export class Camera {
   #camera: ArcRotateCamera;
-  #topView = false;
+  topView = false;
   #status: GameStatus = "not-started";
 
-  constructor(scene: Scene) {
+  constructor(scene: Scene, onChangeTopView: () => void) {
     this.#camera = new ArcRotateCamera(
       "camera",
       INITIAL_ALPHA,
@@ -67,9 +67,14 @@ export class Camera {
     const canvas = document.querySelector("canvas")!;
 
     const updateTopView = () => {
-      this.#topView = this.#camera.beta < 0.3;
+      const lastTopView = this.topView;
+      this.topView = this.#camera.beta < 0.3;
 
-      if (this.#topView) {
+      if (lastTopView !== this.topView) {
+        onChangeTopView();
+      }
+
+      if (this.topView) {
         this.#camera.useAutoRotationBehavior = false;
         this.#animateTo(
           getNearestStep(Math.PI, this.#camera.alpha, Math.PI / 2),
@@ -107,7 +112,7 @@ export class Camera {
     if (newStatus === "in-progress" && this.#status !== "in-progress") {
       this.#camera.useAutoRotationBehavior = false;
 
-      if (!this.#topView) {
+      if (!this.topView) {
         this.#animateTo(
           getNearestStep(INITIAL_ALPHA, this.#camera.alpha, Math.PI / 2),
           INITIAL_BETA
@@ -118,7 +123,7 @@ export class Camera {
     if (
       newStatus === "not-started" &&
       this.#status !== "not-started" &&
-      !this.#topView
+      !this.topView
     ) {
       this.#camera.useAutoRotationBehavior = true;
     }

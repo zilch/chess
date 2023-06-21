@@ -2,7 +2,6 @@ import type { RenderParams, RenderState } from "zilch-game-engine";
 import { standardStartingPosition, type Config, type State } from "./config";
 import {
   Engine,
-  Mesh,
   Scene,
   SceneLoader,
   ScenePerformancePriority,
@@ -19,6 +18,7 @@ import { PieceManager } from "./ui/PieceManager";
 Zilch.Renderer = class Renderer {
   #engine: Engine;
   #scene: Scene;
+  #currentState: RenderState<State, Config> | null = null;
 
   #camera: Camera;
 
@@ -30,13 +30,23 @@ Zilch.Renderer = class Renderer {
     this.#engine = engine;
     this.#scene = scene;
 
+    engine.setHardwareScalingLevel(1);
+
     scene.performancePriority = ScenePerformancePriority.Intermediate;
     scene.clearColor = toBabylonColor("#2F343C").toColor4().toLinearSpace();
 
-    this.#camera = new Camera(scene);
+    this.#camera = new Camera(scene, () => {
+      const fen = this.#getFen(this.#currentState);
+      this.#pieceManager.update(
+        fen,
+        this.#currentState?.botColors[0] ?? null,
+        this.#currentState?.botColors[1] ?? null,
+        this.#camera.topView
+      );
+    });
 
     this.#scene.lights.forEach((light) => {
-      light.intensity /= 900;
+      light.intensity /= 600;
       if (light instanceof SpotLight) {
         const shadowGenerator = new ShadowGenerator(1024, light);
         shadowGenerator.usePercentageCloserFiltering = true;
@@ -54,7 +64,7 @@ Zilch.Renderer = class Renderer {
     this.#pieceManager = new PieceManager(scene, this.#shadowGenerators);
 
     const gl = new GlowLayer("GlowLayer");
-    gl.intensity = 2;
+    gl.intensity = 1;
 
     this.#engine.runRenderLoop(() => {
       this.#scene.render();
@@ -87,6 +97,8 @@ Zilch.Renderer = class Renderer {
       this.#engine.resize();
     }
 
+    this.#currentState = current;
+
     this.#camera.setStatus(current.status);
 
     const currentFen = this.#getFen(current);
@@ -101,7 +113,8 @@ Zilch.Renderer = class Renderer {
       this.#pieceManager.update(
         currentFen,
         current.botColors[0] ?? null,
-        current.botColors[1] ?? null
+        current.botColors[1] ?? null,
+        this.#camera.topView
       );
     }
   }

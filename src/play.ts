@@ -1,7 +1,6 @@
-import { BotOutcome, Game } from "zilch-game-engine";
+import { BotOutcome } from "zilch-game-engine";
 import chalk from "chalk";
 import { Chess } from "chess.js";
-import { Config } from "./config";
 
 Zilch.play = async function* (game) {
   const chess = new Chess(game.config.fen);
@@ -28,6 +27,11 @@ Zilch.play = async function* (game) {
       } else {
         game.bots.forEach((bot) => bot.writeln("Fifty-Move Rule Violation"));
       }
+
+      game.bots.forEach((bot) => {
+        bot.writeln("\n" + chalk.underline("PGN") + ":");
+        bot.writeln(chess.pgn());
+      });
     }
 
     yield { state: chess.fen(), outcome: getOutcome(chess) };
