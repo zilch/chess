@@ -68,7 +68,7 @@ export class Camera {
 
     const updateTopView = () => {
       const lastTopView = this.topView;
-      this.topView = this.#camera.beta < 0.3;
+      this.topView = this.#camera.beta < 0.4;
 
       if (lastTopView !== this.topView) {
         onChangeTopView();

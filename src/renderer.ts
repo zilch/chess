@@ -56,6 +56,17 @@ Zilch.Renderer = class Renderer {
 
     const board = scene.getMeshByName("Board")!;
     board.receiveShadows = true;
+
+    "ABCDEFGH".split("").forEach((file) => {
+      const mesh = scene.getMeshByName("File" + file)!;
+      mesh.receiveShadows = true;
+    });
+
+    "12345678".split("").forEach((rank) => {
+      const mesh = scene.getMeshByName("Rank" + rank)!;
+      mesh.receiveShadows = true;
+    });
+
     this.#shadowGenerators.forEach((shadowGenerator) => {
       shadowGenerator.addShadowCaster(board);
     });

@@ -5,7 +5,15 @@ import { Chess } from "chess.js";
 Zilch.play = async function* (game) {
   const chess = new Chess(game.config.fen);
 
+  const writePgn = () => {
+    game.bots.forEach((bot) => {
+      bot.writeln("\n" + chalk.underline("PGN:"));
+      bot.writeln(chalk.whiteBright.bold(chess.pgn()));
+    });
+  };
+
   if (chess.isGameOver()) {
+    writePgn();
     yield { state: chess.fen(), outcome: getOutcome(chess) };
   }
 
@@ -17,21 +25,20 @@ Zilch.play = async function* (game) {
     const move = chess.move(rawMove, { strict: false });
     bot.writeln(chalk.dim(`⤷ ${move.san}`));
 
+    if (chess.isGameOver()) {
+      writePgn();
+    }
+
     if (chess.isGameOver() && !chess.isCheckmate()) {
       if (chess.isStalemate()) {
-        game.bots.forEach((bot) => bot.writeln("Stalemate"));
+        game.bots.forEach((bot) => bot.writeln("\nStalemate"));
       } else if (chess.isThreefoldRepetition()) {
-        game.bots.forEach((bot) => bot.writeln("Threefold Repetition"));
+        game.bots.forEach((bot) => bot.writeln("\nThreefold Repetition"));
       } else if (chess.isInsufficientMaterial()) {
-        game.bots.forEach((bot) => bot.writeln("Insufficient Material"));
+        game.bots.forEach((bot) => bot.writeln("\nInsufficient Material"));
       } else {
-        game.bots.forEach((bot) => bot.writeln("Fifty-Move Rule Violation"));
+        game.bots.forEach((bot) => bot.writeln("\nFifty-Move Rule Violation"));
       }
-
-      game.bots.forEach((bot) => {
-        bot.writeln("\n" + chalk.underline("PGN") + ":");
-        bot.writeln(chess.pgn());
-      });
     }
 
     yield { state: chess.fen(), outcome: getOutcome(chess) };

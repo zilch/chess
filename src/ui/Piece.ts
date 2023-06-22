@@ -307,25 +307,15 @@ export class Piece {
         },
       ];
 
-      if (reason === "promoted") {
-        sideViewAnimationData.push({
-          property: "position.x",
-          frames: {
-            0: this.#sideViewDisposeAnimationNode.position.x,
-            30:
-              this.#sideViewDisposeAnimationNode.position.x +
-              (this.#color === "w" ? -SQUARE_SIZE : SQUARE_SIZE),
-          },
-          easingFunction: new CubicEase(),
-          immediate,
-        });
+      const mainAnimationData: AnimationData[] = [];
 
-        topViewAnimationData.push({
+      if (reason === "promoted") {
+        mainAnimationData.push({
           property: "position.x",
           frames: {
-            0: this.#topViewDisposeAnimationNode.position.x,
+            0: this.#mainNode.position.x,
             30:
-              this.#topViewDisposeAnimationNode.position.x +
+              this.#mainNode.position.x +
               (this.#color === "w" ? -SQUARE_SIZE : SQUARE_SIZE),
           },
           easingFunction: new CubicEase(),
@@ -335,7 +325,8 @@ export class Piece {
 
       disposeAnimations.push(
         runAnimation(this.#sideViewDisposeAnimationNode, sideViewAnimationData),
-        runAnimation(this.#topViewDisposeAnimationNode, topViewAnimationData)
+        runAnimation(this.#topViewDisposeAnimationNode, topViewAnimationData),
+        runAnimation(this.#mainNode, topViewAnimationData)
       );
     }
 
