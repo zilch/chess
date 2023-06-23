@@ -1,5 +1,5 @@
-import { MeshBuilder, Scene, ShadowGenerator } from "@babylonjs/core";
-import { Chess, PieceSymbol, Square } from "chess.js";
+import { Mesh, MeshBuilder, Scene, ShadowGenerator } from "@babylonjs/core";
+import { Chess, Color, PieceSymbol, Square } from "chess.js";
 import { getBoardTransitionSteps } from "./getBoardTransitionSteps";
 import { BotMaterial } from "./BotMaterial";
 import { PieceTemplate } from "./PieceTemplate";
@@ -7,6 +7,8 @@ import { AttackAnimation } from "./AttackAnimation";
 import { SquareEmphasis } from "./SquareEmphasis";
 import { Piece } from "./Piece";
 import { ringDiameterMap } from "./utils";
+import { PieceMap } from "./PieceMap";
+import { AttackIndicator } from "./AttackIndicator";
 
 export class PieceManager {
   #scene: Scene;
@@ -30,7 +32,12 @@ export class PieceManager {
   #whiteBotMaterial: BotMaterial;
   #blackBotMaterial: BotMaterial;
 
+  #blackPointerTemplate: Mesh;
+  #whitePointerTemplate: Mesh;
+
   #pieceTemplateByType: Record<PieceSymbol, PieceTemplate>;
+
+  #kingAttacks = new Map<string, AttackIndicator>();
 
   constructor(scene: Scene, shadowGenerators: ShadowGenerator[]) {
     this.#scene = scene;
@@ -44,6 +51,16 @@ export class PieceManager {
 
     this.#whiteBotMaterial = new BotMaterial(scene, "w", null);
     this.#blackBotMaterial = new BotMaterial(scene, "b", null);
+
+    const setupPointerTemplate = (template: Mesh, botMaterial: BotMaterial) => {
+      template.receiveShadows = true;
+      template.isVisible = false;
+      template.material = botMaterial.pointer;
+    };
+    this.#whitePointerTemplate = scene.getMeshByName("Pointer") as Mesh;
+    this.#blackPointerTemplate = this.#whitePointerTemplate.clone();
+    setupPointerTemplate(this.#whitePointerTemplate, this.#whiteBotMaterial);
+    setupPointerTemplate(this.#blackPointerTemplate, this.#blackBotMaterial);
 
     const common = {
       blackBotMaterial: this.#blackBotMaterial,
@@ -119,6 +136,53 @@ export class PieceManager {
       const { adds, removals, moves, toChess, fromChess } =
         getBoardTransitionSteps(fen, this.#fen);
       this.#fen = fen;
+
+      let kingAttacks = new Map<
+        string,
+        { from: Square; to: Square; color: string }
+      >();
+
+      if (toChess.isCheck()) {
+        const king = getKing(toChess, toChess.turn());
+        kingAttacks = new Map(
+          getAttackers(toChess.fen(), king.square).map((from) => {
+            const to = king.square;
+            const color =
+              (toChess.turn() === "w" ? blackColor : whiteColor) ?? "#666";
+            return [AttackIndicator.key(from, to, color), { from, to, color }];
+          })
+        );
+      }
+
+      // Remove attack that are in both
+      kingAttacks.forEach((_, key) => {
+        if (this.#kingAttacks.has(key)) {
+          kingAttacks.delete(key);
+        }
+      });
+
+      // Dispose attacks only in old
+      this.#kingAttacks.forEach((attack, key) => {
+        if (!kingAttacks.has(key)) {
+          this.#kingAttacks.delete(key);
+          attack.dispose(immediate);
+        }
+      });
+
+      // Add new attacks
+      kingAttacks.forEach((attack, key) => {
+        this.#kingAttacks.set(
+          key,
+          new AttackIndicator(
+            attack.from,
+            attack.to,
+            toChess.turn() === "b"
+              ? this.#blackPointerTemplate
+              : this.#whitePointerTemplate,
+            !toChess.isCheckmate() && immediate
+          )
+        );
+      });
 
       if (
         (moves.length === 1 && adds.length <= 1 && removals.length <= 1) ||
@@ -230,4 +294,46 @@ export class PieceManager {
       });
     }
   }
+}
+
+function getKing(chess: Chess, color: Color) {
+  const pieces = new PieceMap(chess.fen());
+
+  const kings = Array.from(
+    pieces.getByTypeAndColor({
+      type: "k",
+      color,
+    })
+  );
+
+  if (kings.length !== 1) {
+    // This probably should never happen
+    throw new Error("Expected exactly one king on the board.");
+  }
+
+  return kings[0];
+}
+
+function getAttackers(fen: string, square: Square) {
+  const [board, turn, ...rest] = fen.split(" ");
+  const chess = new Chess([board, turn === "w" ? "b" : "w", ...rest].join(" "));
+
+  const squareColor: Color | null = chess.get(square)?.color ?? null;
+  const attackers: Square[] = [];
+
+  for (const piece of chess.board().flat()) {
+    if (!piece || !squareColor || squareColor === piece.color) {
+      continue;
+    }
+
+    if (
+      chess
+        .moves({ verbose: true, square: piece.square })
+        .some((move) => move.to === square)
+    ) {
+      attackers.push(piece.square);
+    }
+  }
+
+  return attackers;
 }

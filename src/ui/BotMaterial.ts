@@ -9,6 +9,7 @@ export class BotMaterial {
   simple: PBRMaterial;
   outline: PBRMaterial;
   ring: PBRMaterial;
+  pointer: PBRMaterial;
 
   #color: string | null | undefined;
 
@@ -23,6 +24,11 @@ export class BotMaterial {
     this.ring = new PBRMaterial("RingMaterial", scene);
     this.ring.roughness = 1;
     this.ring.alpha = 0.8;
+
+    this.pointer = new PBRMaterial("PointerMaterial", scene);
+    this.pointer.roughness = 0.9;
+    this.pointer.alpha = 0.8;
+    this.pointer.emissiveIntensity = 0.6;
 
     this.update(color, true);
   }
@@ -59,6 +65,29 @@ export class BotMaterial {
         property: "emissiveColor",
         frames: {
           0: this.ring.emissiveColor,
+          40: colorAdjusted.clone(),
+        },
+        animationType: Animation.ANIMATIONTYPE_COLOR3,
+        easingFunction,
+        immediate,
+      },
+    ]);
+
+    runAnimation(this.pointer, [
+      {
+        property: "albedoColor",
+        frames: {
+          0: this.pointer.albedoColor,
+          40: colorAdjusted.clone(),
+        },
+        animationType: Animation.ANIMATIONTYPE_COLOR3,
+        easingFunction,
+        immediate,
+      },
+      {
+        property: "emissiveColor",
+        frames: {
+          0: this.pointer.emissiveColor,
           40: colorAdjusted.clone(),
         },
         animationType: Animation.ANIMATIONTYPE_COLOR3,

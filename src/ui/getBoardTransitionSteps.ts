@@ -1,10 +1,5 @@
-import { Chess, PieceSymbol, Color, Square, Move } from "chess.js";
-
-interface Piece {
-  type: PieceSymbol;
-  color: Color;
-  square: Square;
-}
+import { Chess, Square } from "chess.js";
+import { Piece, PieceMap } from "./PieceMap";
 
 interface AddTransitionStep {
   piece: Piece;
@@ -119,64 +114,4 @@ export function getBoardTransitionSteps(
   }
 
   return { adds, moves, removals, toChess, fromChess };
-}
-
-class PieceMap {
-  #bySquare = new Map<string, Piece>();
-  #byTypeAndColor = new Map<string, Set<Piece>>();
-
-  constructor(fen: string | null) {
-    if (!fen) {
-      return;
-    }
-
-    const chess = new Chess(fen);
-
-    for (const piece of chess.board().flat()) {
-      if (!piece) {
-        continue;
-      }
-
-      this.#bySquare.set(piece.square, piece);
-
-      const typeAndColorKey = this.#getTypeAndColorKey(piece);
-      const byTypeAndColor =
-        this.#byTypeAndColor.get(typeAndColorKey) ?? new Set();
-      byTypeAndColor.add({ ...piece });
-      this.#byTypeAndColor.set(typeAndColorKey, byTypeAndColor);
-    }
-  }
-
-  getBySquare(square: string) {
-    return this.#bySquare.get(square);
-  }
-
-  getByTypeAndColor(piece: Piece) {
-    const typeAndColorKey = this.#getTypeAndColorKey(piece);
-    return this.#byTypeAndColor.get(typeAndColorKey) ?? new Set();
-  }
-
-  delete(piece: Piece) {
-    const typeAndColorKey = this.#getTypeAndColorKey(piece);
-    const byTypeAndColor =
-      this.#byTypeAndColor.get(typeAndColorKey) ?? new Set();
-    for (const sameTypeAndColorPiece of byTypeAndColor) {
-      if (sameTypeAndColorPiece.square === piece.square) {
-        byTypeAndColor.delete(sameTypeAndColorPiece);
-      }
-    }
-    if (byTypeAndColor.size === 0) {
-      this.#byTypeAndColor.delete(typeAndColorKey);
-    }
-
-    this.#bySquare.delete(piece.square);
-  }
-
-  values() {
-    return this.#bySquare.values();
-  }
-
-  #getTypeAndColorKey(piece: Piece) {
-    return piece.type + piece.color;
-  }
 }
