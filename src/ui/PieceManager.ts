@@ -103,7 +103,8 @@ export class PieceManager {
     for (const animatable of this.#scene.animatables) {
       if (
         animatable.target.name !== "SideViewNode" &&
-        animatable.target.name !== "TopViewNode"
+        animatable.target.name !== "TopViewNode" &&
+        animatable.target.name !== "AttackAnimation"
       ) {
         animatable.goToFrame(animatable.toFrame);
         animatable.stop();

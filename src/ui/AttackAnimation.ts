@@ -15,7 +15,7 @@ import {
 
 export class AttackAnimation {
   constructor(square: Square, color: string | null, delay: number) {
-    const mesh = MeshBuilder.CreateDisc("recent", {
+    const mesh = MeshBuilder.CreateDisc("AttackAnimation", {
       radius: SQUARE_SIZE * 1.3,
       tessellation: 32,
     });
