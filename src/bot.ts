@@ -1,4 +1,4 @@
-import type { CreateBotParams } from "zilch-game-engine";
+import type { StartBotParams } from "zilch-game-engine";
 import { defer } from "./defer";
 import { Chess } from "chess.js";
 
@@ -6,11 +6,11 @@ const noMatch = Symbol("noMatch");
 const cancel = Symbol("cancel");
 
 Zilch.Bot = class Bot {
-  #params: CreateBotParams;
+  #params: StartBotParams;
   #stockfish: Worker | null = null;
   #timeUsed = 0;
 
-  constructor(params: CreateBotParams) {
+  constructor(params: StartBotParams) {
     this.#params = params;
     if (this.#params.type !== "practice") {
       this.#stockfish = this.initStockfish();
@@ -43,7 +43,7 @@ Zilch.Bot = class Bot {
     return this;
   }
 
-  static async create(params: CreateBotParams) {
+  static async start(params: StartBotParams) {
     return await new Bot(params).start();
   }
 
