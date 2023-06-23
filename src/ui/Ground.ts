@@ -3,7 +3,6 @@ import {
   MeshBuilder,
   PBRMaterial,
   Scene,
-  ShadowGenerator,
   Vector3,
 } from "@babylonjs/core";
 
