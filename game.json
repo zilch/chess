@@ -7,6 +7,6 @@
   "moveDelay": 900,
   "defaultTimeLimitMilliseconds": {
     "game": null,
-    "move": 100
+    "move": 2000
   }
 }

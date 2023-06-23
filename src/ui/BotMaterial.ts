@@ -27,8 +27,7 @@ export class BotMaterial {
 
     this.pointer = new PBRMaterial("PointerMaterial", scene);
     this.pointer.roughness = 0.9;
-    this.pointer.alpha = 0.8;
-    this.pointer.emissiveIntensity = 0.6;
+    this.pointer.emissiveIntensity = 0.5;
 
     this.update(color, true);
   }
@@ -43,8 +42,8 @@ export class BotMaterial {
     const colorAdjusted = toBabylonColor(
       csx
         .color(color ?? fallbackColor)
-        .saturate(0.05)
-        .darken(0.01)
+        .saturate(0.06)
+        .darken(0.02)
         .toString()
     );
 
