@@ -75,6 +75,12 @@ process.stdin.on("data", async (data) => {
     process.stderr.write(`<<zilch:move${move.x},${move.y}>>`);
     return;
   }
+
+  // "e" for "end"
+  if (command === "e") {
+    await bot.move(payload.split("|").map((row) => row.split(",")));
+    return;
+  }
 });
 
 process.stderr.write("<<zilch:ready>>");

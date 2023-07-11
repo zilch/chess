@@ -47,6 +47,10 @@ Zilch.Bot = class Bot {
     return await new Bot(params).start();
   }
 
+  async end() {
+    this.#params.println("Good game!");
+  }
+
   async move(fen: string) {
     const start = performance.now();
 

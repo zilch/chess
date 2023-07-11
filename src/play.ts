@@ -26,6 +26,7 @@ Zilch.play = async function* (game) {
     bot.writeln(chalk.dim(`⤷ ${move.san}`));
 
     if (chess.isGameOver()) {
+      await Promise.all(game.bots.map((bot) => bot.end(chess.fen())));
       writePgn();
     }
 
