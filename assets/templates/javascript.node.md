@@ -2,86 +2,123 @@
 node main.js
 ```
 
-```sh config=build
-node main.js
-```
-
-```js file=/bot.js
-class Bot {
-  constructor(config) {
-    this.config = config;
-    console.log("Hello world", this.config);
-  }
-
-  move(board) {
-    console.log(board);
-
-    const availableSpots = [];
-
-    for (let x = 0; x < 3; x++) {
-      for (let y = 0; y < 3; y++) {
-        if (board[x][y] === "empty") {
-          availableSpots.push({ x, y });
-        }
-      }
+```json file=/.devcontainer.json hidden=true
+{
+  "name": "Zilch Bot",
+  "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:18",
+  "postAttachCommand": "./connect --welcome",
+  "customizations": {
+    "codespaces": {
+      "openFiles": ["bot.js"]
     }
-
-    return availableSpots[Math.floor(Math.random() * availableSpots.length)];
   }
 }
-
-module.exports.Bot = Bot;
 ```
 
-```js file=/main.js
+```md file=/README.md hidden=true
+Check if you have Node.js installed on your system like this:
+
+\`\`\`
+node --version
+\`\`\`
+
+If you receive a `command not found` error follow the instructions
+at https://nodejs.org/ to get up and running. Once you have Node.js
+on your system you should be good to go! Run `./connect` from the
+bot directory to play.
+```
+
+```js file=/main.js hidden=true
+// ⚠️ Only modify this file if you know what you're doing!
 const { Bot } = require("./bot");
 
-let bot;
+function send(channel, botInstanceId, payload) {
+  let message = `\n<<zilch>>.${channel}`;
 
-process.stdin.on("data", async (data) => {
-  const input = data.toString();
-  const command = input.slice(0, 1);
-  const payload = input.slice(1);
+  if (botInstanceId) {
+    message += "." + botInstanceId;
+  }
 
-  // "s" for "start"
-  if (command === "s") {
+  if (payload) {
+    message += "." + payload;
+  }
+
+  message += "\n";
+
+  process.stderr.write(message);
+}
+
+const bots = new Map();
+
+process.stdin.on("data", async (chunk) => {
+  const data = chunk.toString().trim();
+  const [channel, botInstanceId] = data.split(".", 2);
+  const payload = data.slice(channel.length + botInstanceId.length + 2);
+
+  if (channel === "start") {
     const standardCustomConfigSplit = payload.indexOf(".");
     const standardConfigParts = payload
       .slice(0, standardCustomConfigSplit)
       .split(",");
 
     const config = {
+      botInstanceId,
       gameTimeLimit: parseInt(standardConfigParts[0]),
       turnTimeLimit: parseInt(standardConfigParts[1]),
-      player: standardConfigParts[2] === "0" ? "x" : "o",
-      startingPosition: payload
-        .slice(standardCustomConfigSplit + 1)
-        .split("|")
-        .map((row) => row.split(",")),
+      player: standardConfigParts[2] === "0" ? "white" : "black",
+      startingPosition: payload.slice(standardCustomConfigSplit + 1),
     };
 
-    bot = new Bot(config);
+    bots.set(botInstanceId, new Bot(config));
 
-    process.stderr.write("<<zilch:started>>");
-
+    send("start", botInstanceId);
     return;
   }
 
-  // "m" for "move"
-  if (command === "m") {
-    const move = await bot.move(
-      payload.split("|").map((row) => row.split(","))
-    );
-    process.stderr.write(`<<zilch:move${move.x},${move.y}>>`);
+  const bot = bots.get(botInstanceId);
+
+  if (!bot) {
+    throw new Error("No bot runner with id " + botInstanceId);
+  }
+
+  if (channel === "move") {
+    const move = await bot.move(payload);
+    send("move", botInstanceId, move);
     return;
   }
 
-  // "e" for "end"
-  if (command === "e") {
-    await bot.move(payload.split("|").map((row) => row.split(",")));
+  if (channel === "end") {
+    await bot.end(payload);
+    bots.delete(botInstanceId);
     return;
   }
 });
 
-process.stderr.write("<<zilch:ready>>");
+send("ready");
+```
+
+```js file=/bot.js
+// 👉 Run "./connect" in the terminal to get started
+class Bot {
+  constructor(config) {
+    this.config = config;
+    console.log("Hello world!", this.config);
+  }
+
+  move(fen) {
+    // The current game state in Forsyth-Edwards notation
+    // https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
+    console.log(fen);
+
+    // Return moves using algebraic notation
+    // https://en.wikipedia.org/wiki/Algebraic_notation_(chess)
+    return this.config.player === "white" ? "e4" : "e5";
+  }
+
+  end(fen) {
+    console.log("Good game!");
+  }
+}
+
+module.exports.Bot = Bot;
 ```
