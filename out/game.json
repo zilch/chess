@@ -7,11 +7,12 @@
   ],
   "minSlots": 2,
   "defaultTimeLimitMilliseconds": {
-    "move": 2000,
+    "move": 1000,
     "game": null
   },
   "moveDelay": 900,
   "templates": [
-    "javascript.node"
+    "javascript.node",
+    "python.3"
   ]
 }
