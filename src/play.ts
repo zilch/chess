@@ -1,6 +1,8 @@
 import { BotOutcome } from "zilch-game-engine";
-import chalk from "chalk";
+import { Chalk } from "chalk";
 import { Chess } from "chess.js";
+
+const chalk = new Chalk({ level: 3 });
 
 Zilch.play = async function* (game) {
   const chess = new Chess(game.config.fen);
