@@ -84,7 +84,7 @@ while True:
 ```
 
 ```py file=/bot.py
-# 👉 Run "./connect" in the terminal to get started
+# 👉 Run "./connect" (or "connect.cmd" on Windows) in the terminal to get started
 class Bot:
     def __init__(self, config):
       self.config = config
