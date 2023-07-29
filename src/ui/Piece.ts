@@ -8,7 +8,13 @@ import {
   Quaternion,
   ShadowGenerator,
 } from "@babylonjs/core";
-import { AnimationData, SQUARE_SIZE, getPosition, runAnimation } from "./utils";
+import {
+  AnimationData,
+  SQUARE_SIZE,
+  applyMeshPerfFlags,
+  getPosition,
+  runAnimation,
+} from "./utils";
 import { Color, Square } from "chess.js";
 import { PieceTemplate } from "./PieceTemplate";
 
@@ -45,15 +51,20 @@ export class Piece {
     this.#color = color;
 
     // Create instances
-    const pieceInstance = template.piece[color].createInstance("PieceInstance");
-    const pieceRingInstance =
-      template.pieceRing[color].createInstance("PieceRingInstance");
-    const simplePieceInstance = template.simplePiece[color].createInstance(
-      "SimplePieceInstance"
+    const pieceInstance = applyMeshPerfFlags(
+      template.piece[color].createInstance("PieceInstance")
     );
-    const simplePieceOutlineInstance = template.simplePieceOutline[
-      color
-    ].createInstance("SimplePieceOutlineInstance");
+    const pieceRingInstance = applyMeshPerfFlags(
+      template.pieceRing[color].createInstance("PieceRingInstance")
+    );
+    const simplePieceInstance = applyMeshPerfFlags(
+      template.simplePiece[color].createInstance("SimplePieceInstance")
+    );
+    const simplePieceOutlineInstance = applyMeshPerfFlags(
+      template.simplePieceOutline[color].createInstance(
+        "SimplePieceOutlineInstance"
+      )
+    );
 
     // Establish hierarchy
     this.#topViewNode.parent = this.#mainNode;

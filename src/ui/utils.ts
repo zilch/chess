@@ -5,6 +5,7 @@ import {
   Node,
   Color3,
   Vector3,
+  AbstractMesh,
 } from "@babylonjs/core";
 import { PieceSymbol, Square } from "chess.js";
 import * as csx from "csx";
@@ -17,6 +18,13 @@ export const ringDiameterMap: Record<PieceSymbol, number> = {
   k: 0.04192,
   n: 0.038996,
 };
+
+export function applyMeshPerfFlags<T extends AbstractMesh>(mesh: T) {
+  mesh.isPickable = false;
+  mesh.doNotSyncBoundingInfo = true;
+  mesh.alwaysSelectAsActiveMesh = true;
+  return mesh;
+}
 
 export const SQUARE_SIZE = 0.057888;
 export const BOARD_HEIGHT = 0.017393;

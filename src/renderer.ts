@@ -4,13 +4,12 @@ import {
   Engine,
   Scene,
   SceneLoader,
-  ScenePerformancePriority,
   ShadowGenerator,
   SpotLight,
   GlowLayer,
 } from "@babylonjs/core";
 import "@babylonjs/loaders";
-import { toBabylonColor } from "./ui/utils";
+import { applyMeshPerfFlags, toBabylonColor } from "./ui/utils";
 import { Camera } from "./ui/Camera";
 import { Ground } from "./ui/Ground";
 import { PieceManager } from "./ui/PieceManager";
@@ -32,7 +31,12 @@ Zilch.Renderer = class Renderer {
 
     engine.setHardwareScalingLevel(1);
 
-    scene.performancePriority = ScenePerformancePriority.Intermediate;
+    scene.autoClear = false;
+    scene.autoClearDepthAndStencil = false;
+    scene.skipPointerMovePicking = true;
+    scene.skipPointerDownPicking = true;
+    scene.skipPointerUpPicking = true;
+    scene.skipFrustumClipping = true;
     scene.clearColor = toBabylonColor("#2F343C").toColor4().toLinearSpace();
 
     this.#camera = new Camera(scene, () => {
@@ -52,6 +56,10 @@ Zilch.Renderer = class Renderer {
         shadowGenerator.usePercentageCloserFiltering = true;
         this.#shadowGenerators.push(shadowGenerator);
       }
+    });
+
+    scene.meshes.forEach((mesh) => {
+      applyMeshPerfFlags(mesh);
     });
 
     const board = scene.getMeshByName("Board")!;

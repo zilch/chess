@@ -10,6 +10,7 @@ import {
 import { PieceSymbol, Square } from "chess.js";
 import {
   SQUARE_SIZE,
+  applyMeshPerfFlags,
   getPosition,
   isWhite,
   ringDiameterMap,
@@ -31,6 +32,7 @@ export class SquareEmphasis {
       radius: SQUARE_SIZE,
       tessellation: primary ? 32 : 16,
     });
+    applyMeshPerfFlags(this.#mesh);
     this.#material = new PBRMaterial("");
     this.#material.emissiveIntensity = 0.2;
     this.#material.roughness = 1;

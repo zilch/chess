@@ -6,7 +6,7 @@ import {
   Vector3,
 } from "@babylonjs/core";
 import { Square } from "chess.js";
-import { getPosition, runAnimation } from "./utils";
+import { applyMeshPerfFlags, getPosition, runAnimation } from "./utils";
 
 export class AttackIndicator {
   #pointer: InstancedMesh;
@@ -23,6 +23,7 @@ export class AttackIndicator {
     const distanceZ = toPosition.z - fromPosition.z;
 
     this.#pointer = pointerTemplate.createInstance("PointerInstance");
+    applyMeshPerfFlags(this.#pointer);
     this.#pointer.position = fromPosition;
     this.#pointer.rotationQuaternion = null;
     this.#pointer.rotation.z = Math.PI / 2;
