@@ -20,11 +20,35 @@ Zilch.play = async function* (game) {
   }
 
   while (true) {
-    const bot = game.bots[chess.turn() === "w" ? 0 : 1];
+    const botIndex = chess.turn() === "w" ? 0 : 1;
+    const bot = game.bots[botIndex];
 
     bot.writeln(chalk.dim(`Start turn`));
+
     const rawMove = await bot.move(chess.fen());
-    const move = chess.move(rawMove, { strict: false });
+
+    let move;
+    try {
+      move = chess.move(rawMove, { strict: false });
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message.toLowerCase().includes("invalid move")
+      ) {
+        bot.writeln(chalk.bold.redBright(`\nInvalid move: ${rawMove}`));
+
+        yield {
+          state: chess.fen(),
+          outcome:
+            botIndex === 0
+              ? [BotOutcome.Error, BotOutcome.None]
+              : [BotOutcome.None, BotOutcome.Error],
+        };
+      }
+
+      throw error;
+    }
+
     bot.writeln(chalk.dim(`⤷ ${move.san}`));
 
     if (chess.isGameOver()) {
