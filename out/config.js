@@ -1,2 +1,2 @@
-import{a}from"./chunk-DB6LAMNY.js";import"./chunk-VF6LVY7D.js";export{a as standardStartingPosition};
+import{a}from"./chunk-VSFRTHTC.js";import"./chunk-HEEDEGUW.js";export{a as standardStartingPosition};
 //# sourceMappingURL=config.js.map
