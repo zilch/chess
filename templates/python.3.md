@@ -69,7 +69,7 @@ while True:
 
 class Bot:
     def __init__(self, config):
-      self.config = config
+       self.config = config
         print("Hello World!", config)
         pass
 
